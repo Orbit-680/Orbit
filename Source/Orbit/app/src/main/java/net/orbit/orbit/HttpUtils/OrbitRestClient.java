@@ -7,7 +7,8 @@ import com.loopj.android.http.*;
  */
 
 public class OrbitRestClient {
-    private static final String BASE_URL = "http://18.220.78.140/orbit-api/";
+    //private static final String BASE_URL = "http://18.220.78.140/orbit-api/";
+    private static final String BASE_URL = "http://10.0.2.2:8080/";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
 
