@@ -1,4 +1,4 @@
-package net.orbit.orbit.Service;
+package net.orbit.orbit.services;
 
 import android.content.Context;
 import android.util.Log;
@@ -6,9 +6,8 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
-import net.orbit.orbit.AddTeacherActivity;
-import net.orbit.orbit.Model.Teacher;
-import net.orbit.orbit.Utils.OrbitRestClient;
+import net.orbit.orbit.models.Student;
+import net.orbit.orbit.utils.OrbitRestClient;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,20 +18,21 @@ import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
 /**
- * Created by brocktubre on 11/6/17.
+ * Created by David on 11/8/2017.
  */
 
-public class TeacherService {
+public class StudentService
+{
     OrbitRestClient orbitRestClient = new OrbitRestClient();
     PropertiesService propertiesService = new PropertiesService();
     Context context;
 
-    public TeacherService(Context context){
+    public StudentService(Context context){
         this.context = context;
     }
-    public void addTeacher(Teacher newTeacher){
+    public void addStudent(Student newStudent){
         Gson gson = new Gson();
-        String json = gson.toJson(newTeacher);
+        String json = gson.toJson(newStudent);
         StringEntity entity = null;
         try {
             entity = new StringEntity(json.toString());
@@ -42,7 +42,7 @@ public class TeacherService {
 
         // Sets the URL for the API url
         orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,"orbit.api.url"));
-        orbitRestClient.post(this.context, "add-teacher", entity, "application/json",
+        orbitRestClient.post(this.context, "create-menu_student", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {
@@ -50,16 +50,16 @@ public class TeacherService {
                     }
 
                     @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray teacher) {
+                    public void onSuccess(int statusCode, Header[] headers, JSONArray student) {
                         // called when success happens
-                        Log.i("AddTeacherActivity", "Successfully added new teacher: " + teacher);
+                        Log.i("CreateStudentActivity", "Successfully created new menu_teacher: " + student);
 
                     }
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                        Log.e("AddTeacherActivity", "Error when adding new teacher: " + errorResponse);
+                        Log.e("CreateStudentActivity", "Error when creating new menu_student: " + errorResponse);
                     }
 
                     @Override

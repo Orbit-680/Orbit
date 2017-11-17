@@ -1,8 +1,9 @@
-package net.orbit.orbit;
+package net.orbit.orbit.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -37,7 +38,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import net.orbit.orbit.Utils.OrbitUserPreferences;
+import net.orbit.orbit.R;
+import net.orbit.orbit.utils.OrbitUserPreferences;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +77,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    public static Intent createIntent(Context context) {
+        Intent i = new Intent(context, LoginActivity.class);
+        return i;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,9 +122,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-
         mAuth = FirebaseAuth.getInstance();
-
     }
 
     @Override
@@ -125,6 +130,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        //if user is already logged in then send them to home screen
+        if(currentUser != null) {
+            Toast.makeText(this, "Welcome Back " + currentUser.getEmail(),
+                    Toast.LENGTH_SHORT).show();
+            loadHomeScreen();
+        }
+
         updateUI(currentUser);
     }
 
