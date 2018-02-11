@@ -8,17 +8,16 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
         versionCode System.getenv("BUILD_NUMBER") as Integer ?: 0
-        versionName "0.0." + System.getenv("BUILD_NUMBER") as String ?: "0"
+        versionName "0." + System.getenv("BUILD_NUMBER") + ".0"  ?: "0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
         release {
-            storeFile file("/opt/bitnami/keystore/keystore.jks")
-//            storeFile file("/Users/brocktubre/Desktop/Grad_School/CSC680-681/keystore.jks")
-            storePassword "password123"
+            storeFile file("/opt/bitnami/keystore/keystore_file.jks")
+            //storeFile file("/Users/brocktubre/Desktop/Grad_School/CSC680-681/keystore_file.jks")
+            storePassword "092890bwt"
             keyAlias "key0"
-            keyPassword "password123"
-
+            keyPassword "092890bwt"
 
         }
     }
@@ -31,6 +30,7 @@ android {
             versionNameSuffix "-beta"
         }
         alpha {
+
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
         }
