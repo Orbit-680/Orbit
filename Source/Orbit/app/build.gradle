@@ -7,14 +7,16 @@ android {
         applicationId "net.orbit.orbit"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode System.getenv("BUILD_NUMBER") as Integer ?: 0
-        versionName "0." + System.getenv("BUILD_NUMBER") + ".0"  ?: "0"
+        versionCode 84 + System.getenv("BUILD_NUMBER") as Integer ?: 0
+        versionName "0." + System.getenv("BUILD_NUMBER") + ".0" as String ?: "0"
+//        versionCode 80
+//        versionName "0.80.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
         release {
-            storeFile file("/opt/bitnami/keystore/keystore_file.jks")
-            //storeFile file("/Users/brocktubre/Desktop/Grad_School/CSC680-681/keystore_file.jks")
+            //storeFile file("/opt/bitnami/keystore/keystore_file.jks")
+            storeFile file("/Users/brocktubre/Desktop/Grad_School/CSC680-681/keystore_file.jks")
             storePassword "092890bwt"
             keyAlias "key0"
             keyPassword "092890bwt"
