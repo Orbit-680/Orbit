@@ -7,7 +7,7 @@ android {
         applicationId "net.orbit.orbit"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 84 + System.getenv("BUILD_NUMBER") as Integer ?: 0
+        versionCode 1000 + (System.getenv("BUILD_NUMBER") as Integer) ?: 0
         versionName "0." + System.getenv("BUILD_NUMBER") + ".0" as String ?: "0"
 //        versionCode 80
 //        versionName "0.80.0"
