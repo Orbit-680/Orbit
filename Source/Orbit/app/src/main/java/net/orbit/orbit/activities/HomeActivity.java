@@ -45,27 +45,13 @@ public class HomeActivity extends BaseActivity {
 
     PropertiesService propertiesService = new PropertiesService();
     OrbitRestClient orbitRestClient = new OrbitRestClient();
-    List<MainMenuItem> mainMenuItems = new ArrayList<>();
+    List<MainMenuItem> mainMenuItems = MenuList.mainMenuList;
     LogoutService logoutService = new LogoutService(this);
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        User user = orbitPref.getUserPreferenceObj("loggedUser");
-        Log.i("UserFromSharedPref", user.toString());
-        String userRole = user.getRole().getName();
-
-        // ROLE BASED LIST ASSIGNMENT FOR MENU GRID GENERATION
-        if(userRole.equals(Constants.ROLE_ADMIN))
-            this.mainMenuItems = MenuList.adminMenuList;
-        else if(userRole.equals(Constants.ROLE_TEACHER))
-            this.mainMenuItems = MenuList.teacherMenuList;
-        else if(userRole.equals(Constants.ROLE_PARENT))
-            this.mainMenuItems = MenuList.parentMenuList;
-        else if(userRole.equals(Constants.ROLE_STUDENT))
-            this.mainMenuItems = MenuList.studentMenuList;
         super.onCreate(savedInstanceState);
 
         //need to inflate this activity inside the relativeLayout inherited from BaseActivity.  This will add this view to the mainContent layout
@@ -113,13 +99,46 @@ public class HomeActivity extends BaseActivity {
 
                  if (convertView == null)
                  {
+                     OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
+                     User user = orbitPref.getUserPreferenceObj("loggedUser");
+                     Log.i("UserFromSharedPref", user.toString());
+                     String userRole = user.getRole().getName();
+
                      MainMenuItem temp = menuItems.get(position);
+                     String tempRole = temp.getRole();
                      grid = new View(mContext);
-                     grid = inflater.inflate(R.layout.grid_item, null);
-                     TextView textView = (TextView) grid.findViewById(R.id.gridText);
-                     ImageView imageView = (ImageView) grid.findViewById(R.id.gridImage);
-                     textView.setText(getString(temp.getLabel()));
-                     imageView.setImageResource(temp.getImage());
+                     if(userRole.equals(Constants.ROLE_ADMIN))
+                     {
+                        grid = inflater.inflate(R.layout.grid_item, null);
+                        TextView textView = (TextView) grid.findViewById(R.id.gridText);
+                        ImageView imageView = (ImageView) grid.findViewById(R.id.gridImage);
+                        textView.setText(getString(temp.getLabel()));
+                        imageView.setImageResource(temp.getImage());
+                     }
+                     else if(userRole.equals(Constants.ROLE_TEACHER) && temp.getRole().equals(Constants.ROLE_TEACHER) || temp.getRole().equals(Constants.DEFAULT))
+                     {
+                             grid = inflater.inflate(R.layout.grid_item, null);
+                             TextView textView = (TextView) grid.findViewById(R.id.gridText);
+                             ImageView imageView = (ImageView) grid.findViewById(R.id.gridImage);
+                             textView.setText(getString(temp.getLabel()));
+                             imageView.setImageResource(temp.getImage());
+                     }
+                     if(userRole.equals(Constants.ROLE_PARENT) && tempRole.equals(Constants.ROLE_PARENT) || temp.getRole().equals(Constants.DEFAULT))
+                     {
+                         grid = inflater.inflate(R.layout.grid_item, null);
+                         TextView textView = (TextView) grid.findViewById(R.id.gridText);
+                         ImageView imageView = (ImageView)grid.findViewById(R.id.gridImage);
+                         textView.setText(getString(temp.getLabel()));
+                         imageView.setImageResource(temp.getImage());
+                     }
+                     if(userRole.equals(Constants.ROLE_STUDENT) && tempRole.equals(Constants.ROLE_STUDENT) || temp.getRole().equals(Constants.DEFAULT))
+                     {
+                         grid = inflater.inflate(R.layout.grid_item, null);
+                         TextView textView = (TextView) grid.findViewById(R.id.gridText);
+                         ImageView imageView = (ImageView)grid.findViewById(R.id.gridImage);
+                         textView.setText(getString(temp.getLabel()));
+                         imageView.setImageResource(temp.getImage());
+                     }
                  } else
                      grid = convertView;
 

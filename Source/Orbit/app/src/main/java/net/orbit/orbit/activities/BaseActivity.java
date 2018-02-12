@@ -56,7 +56,7 @@ public class BaseActivity extends AppCompatActivity {
 
     private LogoutService logoutService;
 
-    private List<MainMenuItem> mainMenuItems;
+    private List<MainMenuItem> mainMenuItems = MenuList.mainMenuList;
     private DrawerListAdapter adapter;
 
 
@@ -321,7 +321,6 @@ public class BaseActivity extends AppCompatActivity {
 
         if (userRole.equals(Constants.ROLE_ADMIN))
         {
-            this.mainMenuItems = MenuList.adminMenuList;
             for(MainMenuItem item : mainMenuItems)
             {
                 String label = getString(item.getLabel());
@@ -331,35 +330,41 @@ public class BaseActivity extends AppCompatActivity {
             }
         } else if (userRole.equals(Constants.ROLE_TEACHER))
         {
-            this.mainMenuItems = MenuList.teacherMenuList;
             for(MainMenuItem item : mainMenuItems)
             {
+                if(item.getRole().equals(Constants.ROLE_TEACHER) || item.getRole().equals(Constants.DEFAULT))
+                {
                     String label = getString(item.getLabel());
                     String title = getString(item.getTitle());
                     mNavItems.add(new NavItem(label, title, item.getImage()));
                     adapter.notifyDataSetChanged();
+                }
             }
 
         } else if (userRole.equals(Constants.ROLE_PARENT))
         {
-            this.mainMenuItems = MenuList.parentMenuList;
             for(MainMenuItem item : mainMenuItems)
             {
+                if(item.getRole().equals(Constants.ROLE_PARENT) || item.getRole().equals(Constants.DEFAULT))
+                {
                     String label = getString(item.getLabel());
                     String title = getString(item.getTitle());
                     mNavItems.add(new NavItem(label, title, item.getImage()));
                     adapter.notifyDataSetChanged();
+                }
             }
 
         } else if (userRole.equals(Constants.ROLE_STUDENT))
         {
-            this.mainMenuItems = MenuList.studentMenuList;
             for(MainMenuItem item : mainMenuItems)
             {
+                if(item.getRole().equals(Constants.ROLE_STUDENT) || item.getRole().equals(Constants.DEFAULT))
+                {
                     String label = getString(item.getLabel());
                     String title = getString(item.getTitle());
                     mNavItems.add(new NavItem(label, title, item.getImage()));
                     adapter.notifyDataSetChanged();
+                }
             }
         }
         orbitNav = new OrbitMenuNavigation(getApplicationContext());
