@@ -38,7 +38,7 @@ public class CourseService {
     OrbitRestClient orbitRestClient = new OrbitRestClient();
     PropertiesService propertiesService = new PropertiesService();
     SecurityService securityService = new SecurityService();
-    TeacherService teacherService = new TeacherService();
+    TeacherService teacherService = new TeacherService(this.context);
     Context context;
 
     public CourseService(Context context){
@@ -50,7 +50,7 @@ public class CourseService {
         orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
 
         String UID = securityService.getCurrentUsersUid();
-        teacherService.getTeacherByUid(UID, activity, new ServerCallback<Teacher>() {
+        teacherService.getTeacherByUid(UID, new ServerCallback<Teacher>() {
             @Override
             public void onSuccess(Teacher teacher) {
                 Log.i("CourseService", "Found teacher and call back is working: " + teacher);

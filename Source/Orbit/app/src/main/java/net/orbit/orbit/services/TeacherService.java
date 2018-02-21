@@ -106,8 +106,8 @@ public class TeacherService {
 
     }
 
-    public void getTeacherByUid(String UID, final ViewCoursesTeacherActivity activity , final ServerCallback<Teacher> callback){
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(activity, Constants.ORBIT_API_URL));
+    public void getTeacherByUid(String UID, final ServerCallback<Teacher> callback){
+        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
         orbitRestClient.get("get-teacher-by-uid/" + UID, null, new JsonHttpResponseHandler(){
 
             @Override
@@ -123,7 +123,14 @@ public class TeacherService {
                 // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                 Log.e("TeacherService", "Error when finding teacher by UID: " + errorResponse);
                 Gson gson = new Gson();
-                ErrorResponse er = gson.fromJson(errorResponse.toString(), ErrorResponse.class);
+                ErrorResponse er = null;
+                try{
+                    er = gson.fromJson(errorResponse.toString(), ErrorResponse.class);
+                }
+                catch(Exception ex){
+                    ErrorResponse error = new ErrorResponse("Something went wrong trying to find teacher by UID ");
+                    callback.onFail(error);
+                }
                 callback.onFail(er);
             }
 

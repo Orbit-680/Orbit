@@ -17,9 +17,15 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import net.orbit.orbit.R;
+import net.orbit.orbit.models.exceptions.ErrorResponse;
 import net.orbit.orbit.models.pojo.Course;
+import net.orbit.orbit.models.pojo.Teacher;
+import net.orbit.orbit.models.pojo.User;
 import net.orbit.orbit.services.CourseService;
+import net.orbit.orbit.services.SecurityService;
+import net.orbit.orbit.services.TeacherService;
 import net.orbit.orbit.utils.OrbitUserPreferences;
+import net.orbit.orbit.utils.ServerCallback;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -28,6 +34,8 @@ import java.util.List;
 public class ChooseCourseActivity extends BaseActivity {
     private RecyclerView recyclerView;
     CourseService courseService = new CourseService(this);
+    TeacherService teacherService = new TeacherService(this);
+    SecurityService securityService = new SecurityService();
 
     public static Intent createIntent(Context context) {
         Intent i = new Intent(context, ChooseCourseActivity.class);
@@ -56,6 +64,22 @@ public class ChooseCourseActivity extends BaseActivity {
             courseService.getAllCourses(this);
 
         }
+
+
+        String UID = securityService.getCurrentUsersUid();
+        final OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
+        teacherService.getTeacherByUid(UID, new ServerCallback<Teacher>() {
+
+            @Override
+            public void onSuccess(Teacher result) {
+                orbitPref.storePreference("loggedInTeacher", result);
+            }
+
+            @Override
+            public void onFail(ErrorResponse errorMessage) {
+
+            }
+        });
     }
 
     private void assignCourses()
