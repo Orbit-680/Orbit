@@ -17,9 +17,15 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import net.orbit.orbit.R;
+import net.orbit.orbit.models.exceptions.ErrorResponse;
 import net.orbit.orbit.models.pojo.Course;
+import net.orbit.orbit.models.pojo.Teacher;
+import net.orbit.orbit.models.pojo.User;
 import net.orbit.orbit.services.CourseService;
+import net.orbit.orbit.services.SecurityService;
+import net.orbit.orbit.services.TeacherService;
 import net.orbit.orbit.utils.OrbitUserPreferences;
+import net.orbit.orbit.utils.ServerCallback;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -27,7 +33,6 @@ import java.util.List;
 
 public class ChooseCourseActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    CourseService courseService = new CourseService(this);
 
     public static Intent createIntent(Context context) {
         Intent i = new Intent(context, ChooseCourseActivity.class);
@@ -53,9 +58,25 @@ public class ChooseCourseActivity extends BaseActivity {
         });
 
         if(ChooseCourseActivity.Adapter.courses.size() == 0){
-            courseService.getAllCourses(this);
+            CourseService.getInstance().getAllCourses(this);
 
         }
+
+
+        String UID = SecurityService.getInstance().getCurrentUsersUid();
+        final OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
+        TeacherService.getInstance().getTeacherByUid(UID, new ServerCallback<Teacher>() {
+
+            @Override
+            public void onSuccess(Teacher result) {
+                orbitPref.storePreference("loggedInTeacher", result);
+            }
+
+            @Override
+            public void onFail(ErrorResponse errorMessage) {
+
+            }
+        });
     }
 
     private void assignCourses()
@@ -67,7 +88,7 @@ public class ChooseCourseActivity extends BaseActivity {
             }
         }
 
-        courseService.assignCourseToTeacher(assignList);
+        CourseService.getInstance().assignCourseToTeacher(assignList);
     }
 
     public void updateCourseList(List<Course> courseList)
@@ -89,7 +110,7 @@ public class ChooseCourseActivity extends BaseActivity {
     public void saveCourseList()
     {
         OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        orbitPref.storeUserPreference("courseList", ChooseCourseActivity.Adapter.courses);
+        orbitPref.storeListPreference("courseList", ChooseCourseActivity.Adapter.courses);
     }
 
     public void loadList()
@@ -98,7 +119,7 @@ public class ChooseCourseActivity extends BaseActivity {
         Type type = new TypeToken<List<Course>>() {}.getType();
         List<Course> savedCourseList = new ArrayList<>();
         OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        savedCourseList = gson.fromJson(orbitPref.getUserPreference("courseList"), type);
+        savedCourseList = gson.fromJson(orbitPref.getStringPreference("courseList"), type);
 
         //only set the course list if a List was found saved in Shared Preferences
         if(savedCourseList != null && savedCourseList.size() > 0) {

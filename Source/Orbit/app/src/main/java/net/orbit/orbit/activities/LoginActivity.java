@@ -77,10 +77,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
     private Context test = this;
-
-    private UserService userService = new UserService(this);
-
-
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -163,7 +159,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void loadHomeScreen()
     {
-        userService.storeUserInPreferences(mAuth);
+        UserService.getInstance().storeUserInPreferences(mAuth);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -186,7 +182,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(LoginActivity.this, "Login Successful!",
                                     Toast.LENGTH_SHORT).show();
-                            userService.storeUserInPreferences(mAuth);
+                            UserService.getInstance().storeUserInPreferences(mAuth);
                             loadHomeScreen();
                         } else {
                             // If sign in fails, display a message to the user.

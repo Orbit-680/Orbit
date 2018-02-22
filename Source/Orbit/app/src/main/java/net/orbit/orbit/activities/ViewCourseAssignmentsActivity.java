@@ -23,7 +23,6 @@ import java.util.List;
 
 public class ViewCourseAssignmentsActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    AssignmentService assignmentService = new AssignmentService(this);
     private static int courseID = 0;
 
     public static Intent createIntent(Context context, int courseID) {
@@ -52,7 +51,7 @@ public class ViewCourseAssignmentsActivity extends BaseActivity {
             }
         });
 
-        assignmentService.getAllAssignmentsForCourse(this, ViewCourseAssignmentsActivity.courseID);
+        AssignmentService.getInstance().getAllAssignmentsForCourse(this, ViewCourseAssignmentsActivity.courseID);
     }
 
     public void updateAssignmentList(List<Assignment> assignmentList)

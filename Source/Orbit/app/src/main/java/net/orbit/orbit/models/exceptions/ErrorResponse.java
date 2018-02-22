@@ -14,6 +14,10 @@ public class ErrorResponse {
     String error;
     String path;
 
+    public ErrorResponse(String message){
+        this.message = message;
+    }
+
     public String getStatus() {
         return status;
     }

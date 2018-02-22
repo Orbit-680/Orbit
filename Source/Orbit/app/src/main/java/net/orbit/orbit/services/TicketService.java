@@ -25,15 +25,22 @@ import cz.msebera.android.httpclient.entity.StringEntity;
  */
 
 public class TicketService {
-    OrbitRestClient orbitRestClient = new OrbitRestClient();
-    PropertiesService propertiesService = new PropertiesService();
-    Context context;
+    // Creates a singleton
+    private TicketService() { }
+
+    private static TicketService _ticketService;
+
+    public static TicketService getInstance(){
+        if (_ticketService == null){
+            _ticketService = new TicketService();
+        }
+        return _ticketService;
+    }
+    private Context context;
 
     public TicketService(Context context){
         this.context = context;
     }
-
-    public TicketService() { }
 
     public void addTicket(Ticket ticket){
         Gson gson = new Gson();
@@ -46,8 +53,8 @@ public class TicketService {
         }
 
         // Sets the URL for the API url
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "add-ticket", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "add-ticket", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {

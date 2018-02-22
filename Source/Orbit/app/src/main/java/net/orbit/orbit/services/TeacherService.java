@@ -27,15 +27,22 @@ import cz.msebera.android.httpclient.entity.StringEntity;
  */
 
 public class TeacherService {
-    OrbitRestClient orbitRestClient = new OrbitRestClient();
-    PropertiesService propertiesService = new PropertiesService();
-    Context context;
+
+    // Creates a singleton of the TeacherService
+    private TeacherService() { }
+    private static TeacherService   _teacherService;
+    public static TeacherService getInstance(){
+        if (_teacherService == null){
+            _teacherService = new TeacherService();
+        }
+        return _teacherService;
+    }
+
+    private Context context;
 
     public TeacherService(Context context){
         this.context = context;
     }
-
-    public TeacherService() { }
 
     public void addTeacher(Teacher newTeacher){
         Gson gson = new Gson();
@@ -48,8 +55,8 @@ public class TeacherService {
         }
 
         // Sets the URL for the API url
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "add-teacher", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "add-teacher", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {
@@ -77,8 +84,8 @@ public class TeacherService {
     }
 
     public void viewTeachers(final AllTeachersActivity activity){
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.get("all-teachers", null, new JsonHttpResponseHandler(){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().get("all-teachers", null, new JsonHttpResponseHandler(){
             @Override
             public void onStart() {
                 // called before request is started
@@ -106,9 +113,9 @@ public class TeacherService {
 
     }
 
-    public void getTeacherByUid(String UID, final ViewCoursesTeacherActivity activity , final ServerCallback<Teacher> callback){
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(activity, Constants.ORBIT_API_URL));
-        orbitRestClient.get("get-teacher-by-uid/" + UID, null, new JsonHttpResponseHandler(){
+    public void getTeacherByUid(String UID, final ServerCallback<Teacher> callback){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().get("get-teacher-by-uid/" + UID, null, new JsonHttpResponseHandler(){
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject jsonTeacher) {
@@ -123,7 +130,14 @@ public class TeacherService {
                 // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                 Log.e("TeacherService", "Error when finding teacher by UID: " + errorResponse);
                 Gson gson = new Gson();
-                ErrorResponse er = gson.fromJson(errorResponse.toString(), ErrorResponse.class);
+                ErrorResponse er = null;
+                try{
+                    er = gson.fromJson(errorResponse.toString(), ErrorResponse.class);
+                }
+                catch(Exception ex){
+                    ErrorResponse error = new ErrorResponse("Something went wrong trying to find teacher by UID ");
+                    callback.onFail(error);
+                }
                 callback.onFail(er);
             }
 

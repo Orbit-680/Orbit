@@ -39,9 +39,18 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class StudentService
 {
-    OrbitRestClient orbitRestClient = new OrbitRestClient();
-    PropertiesService propertiesService = new PropertiesService();
-    Context context;
+    // Creates a singleton
+    private StudentService() { }
+
+    private static StudentService _studentService;
+
+    public static StudentService getInstance(){
+        if (_studentService == null){
+            _studentService = new StudentService();
+        }
+        return _studentService;
+    }
+    private Context context;
 
     public StudentService(Context context){
         this.context = context;
@@ -57,8 +66,8 @@ public class StudentService
         }
 
         // Sets the URL for the API url
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "create-student", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "create-student", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {
@@ -101,8 +110,8 @@ public class StudentService
         }
 
         // Sets the URL for the API url
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "get-student", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "get-student", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {
@@ -151,8 +160,8 @@ public class StudentService
         }
 
         // Sets the URL for the API url
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "link-student", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "link-student", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {
@@ -188,8 +197,8 @@ public class StudentService
 
     public void findLinkedStudents(final ChooseStudentActivity activity, String UID)
     {
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.get("find-linked/" + UID, null, new JsonHttpResponseHandler(){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().get("find-linked/" + UID, null, new JsonHttpResponseHandler(){
             @Override
             public void onStart() {
                 // called before request is started
@@ -222,8 +231,8 @@ public class StudentService
 
     public void findAllStudents(final EnrollStudentInCourseActivity activity)
     {
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,"orbit.api.url"));
-        orbitRestClient.get("all-students/", null, new JsonHttpResponseHandler(){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,"orbit.api.url"));
+        OrbitRestClient.getInstance().get("all-students/", null, new JsonHttpResponseHandler(){
             @Override
             public void onStart() {
                 // called before request is started
@@ -273,8 +282,8 @@ public class StudentService
         }
 
         // Sets the URL for the API url
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "enroll-students-course", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "enroll-students-course", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {

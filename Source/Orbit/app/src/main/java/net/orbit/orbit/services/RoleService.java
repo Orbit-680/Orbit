@@ -21,19 +21,28 @@ import cz.msebera.android.httpclient.Header;
  */
 
 public class RoleService {
-    OrbitRestClient orbitRestClient = new OrbitRestClient();
-    PropertiesService propertiesService = new PropertiesService();
-    SecurityService securityService = new SecurityService();
-    Context context;
+
+    // Creates a singleton of the TeacherService
+    private RoleService() { }
+
+    private static RoleService   _roleService;
+
+    public static RoleService getInstance(){
+        if (_roleService == null){
+            _roleService = new RoleService();
+        }
+        return _roleService;
+    }
+
+    private Context context;
 
     public RoleService(Context context){
         this.context = context;
-        //orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
     }
 
     public void viewRoles(final RegisterActivity activity){
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.get("all-roles", null, new JsonHttpResponseHandler(){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().get("all-roles", null, new JsonHttpResponseHandler(){
             @Override
             public void onStart() {
                 // called before request is started
@@ -62,9 +71,9 @@ public class RoleService {
     }
 
     public void hasTeacherRole(){
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
-        String UID = securityService.getCurrentUsersUid();
-        orbitRestClient.get("has-teacher-role/" + UID, null, new JsonHttpResponseHandler(){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        String UID = SecurityService.getInstance().getCurrentUsersUid();
+        OrbitRestClient.getInstance().get("has-teacher-role/" + UID, null, new JsonHttpResponseHandler(){
             @Override
             public void onStart() {
                 // called before request is started

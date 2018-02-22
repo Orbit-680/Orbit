@@ -3,6 +3,8 @@ package net.orbit.orbit.utils;
 import android.content.Context;
 import android.content.res.AssetManager;
 
+import net.orbit.orbit.services.StudentService;
+
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -11,6 +13,18 @@ import java.util.Properties;
  */
 
 public class PropertyReader {
+
+    // Creates a singleton
+    private PropertyReader() { }
+
+    private static PropertyReader _propertyReader;
+
+    public static PropertyReader getInstance(){
+        if (_propertyReader == null){
+            _propertyReader = new PropertyReader();
+        }
+        return _propertyReader;
+    }
     private Context context;
     private Properties properties;
 

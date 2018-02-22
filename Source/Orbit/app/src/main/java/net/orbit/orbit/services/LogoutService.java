@@ -14,7 +14,19 @@ import net.orbit.orbit.utils.OrbitUserPreferences;
 
 public class LogoutService extends BaseActivity{
 
-    Context context;
+    // Creates a singleton
+    private LogoutService() { }
+
+    private static LogoutService _logoutService;
+
+    public static LogoutService getInstance(){
+        if (_logoutService == null){
+            _logoutService = new LogoutService();
+        }
+        return _logoutService;
+    }
+
+    private Context context;
 
     public LogoutService(Context context){
         this.context = context;

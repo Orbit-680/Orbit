@@ -31,11 +31,17 @@ import cz.msebera.android.httpclient.entity.StringEntity;
  */
 
 public class AssignmentService {
-    OrbitRestClient orbitRestClient = new OrbitRestClient();
-    PropertiesService propertiesService = new PropertiesService();
-    SecurityService securityService = new SecurityService();
-    TeacherService teacherService = new TeacherService();
-    Context context;
+    private AssignmentService() { }
+
+    private static AssignmentService _assignmentService;
+
+    public static AssignmentService getInstance(){
+        if (_assignmentService == null){
+            _assignmentService = new AssignmentService();
+        }
+        return _assignmentService;
+    }
+    private Context context;
 
     public AssignmentService(Context context){
         this.context = context;
@@ -43,9 +49,8 @@ public class AssignmentService {
 
     public void getAllAssignmentsForCourse(final ViewCourseAssignmentsActivity activity, int courseID){
         Log.d("AssignmentService", "Getting all the assignments for course ID: " + courseID);
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
-
-        orbitRestClient.get("all-assignments-for-course/" + courseID, null, new JsonHttpResponseHandler(){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().get("all-assignments-for-course/" + courseID, null, new JsonHttpResponseHandler(){
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray assignments) {
@@ -74,8 +79,8 @@ public class AssignmentService {
         }
 
         // Sets the URL for the API url
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "create-assignment", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "create-assignment", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {

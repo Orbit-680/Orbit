@@ -10,6 +10,7 @@ import net.orbit.orbit.models.pojo.Course;
 import net.orbit.orbit.models.pojo.Student;
 import net.orbit.orbit.models.pojo.Teacher;
 import net.orbit.orbit.models.pojo.User;
+import net.orbit.orbit.services.CourseService;
 
 import java.util.List;
 
@@ -18,35 +19,35 @@ import java.util.List;
  */
 
 public class OrbitUserPreferences {
-    private Context context;
-    final private String prefName = "Orbit";
-    private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
+    // Creates a singleton
+    private OrbitUserPreferences() { }
 
-    public OrbitUserPreferences(Context context)
-    {
+    private static OrbitUserPreferences _orbitUserPreferences;
+
+    public static OrbitUserPreferences getInstance(){
+        if (_orbitUserPreferences == null){
+            _orbitUserPreferences = new OrbitUserPreferences();
+        }
+        return _orbitUserPreferences;
+    }
+    private Context context;
+
+    public OrbitUserPreferences(Context context){
         this.context = context;
         pref = this.context.getSharedPreferences(prefName, 0);
         editor = pref.edit();
     }
+    final private String prefName = "Orbit";
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
 
-    /**
-     * Storing text in shared preferences
-     * @param prefName
-     * @param prefValue
-     */
-    public void storeUserPreference(String prefName, String prefValue)
-    {
-        editor.putString(prefName, prefValue); // Storing long
-        editor.commit();
-    }
 
     /**
      * Storing object in shared preferences
      * @param prefName
      * @param type
      */
-    public <T> void storeUserPreference(String prefName, T type)
+    public <T> void storePreference(String prefName, T type)
     {
         Gson gson = new Gson();
         String json = gson.toJson(type);
@@ -59,7 +60,7 @@ public class OrbitUserPreferences {
      * @param prefName
      * @param list
      */
-    public <T> void storeUserPreference(String prefName, List<T> list)
+    public <T> void storeListPreference(String prefName, List<T> list)
     {
         String json = new Gson().toJson(list, new TypeToken<List<T>>(){}.getType());
         editor.putString(prefName, json);
@@ -71,7 +72,7 @@ public class OrbitUserPreferences {
      * @param prefName
      * @return
      */
-    public String getUserPreference(String prefName)
+    public String getStringPreference(String prefName)
     {
         String prefValue = pref.getString(prefName, null);
         return prefValue;
