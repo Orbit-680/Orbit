@@ -27,7 +27,6 @@ public class ReportABugActivity extends BaseActivity {
     EditText issueName;
     EditText issueDescription;
     Spinner issuePrioritySpinner;
-    TicketService ticketService = new TicketService(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +87,7 @@ public class ReportABugActivity extends BaseActivity {
             OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
             User user = orbitPref.getUserPreferenceObj("loggedUser");
             Ticket ticket = new Ticket(name, description, priority, user);
-            ticketService.addTicket(ticket);
+            TicketService.getInstance().addTicket(ticket);
         }
     }
 

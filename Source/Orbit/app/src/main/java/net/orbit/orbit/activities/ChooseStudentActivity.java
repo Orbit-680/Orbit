@@ -21,7 +21,6 @@ import java.util.List;
 
 public class ChooseStudentActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    StudentService studentService = new StudentService(this);
 
     public static Intent createIntent(Context context) {
         Intent i = new Intent(context, ChooseStudentActivity.class);
@@ -37,14 +36,13 @@ public class ChooseStudentActivity extends BaseActivity {
         getLayoutInflater().inflate(R.layout.activity_choose_student, relativeLayout);
 
         //get UID of current user
-        OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        String uid = orbitPref.getStringPreference("userUID");
+        String uid = OrbitUserPreferences.getInstance().getStringPreference("userUID");
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new Adapter(this));
 
-        studentService.findLinkedStudents(this, uid);
+        StudentService.getInstance().findLinkedStudents(this, uid);
 
     }
 

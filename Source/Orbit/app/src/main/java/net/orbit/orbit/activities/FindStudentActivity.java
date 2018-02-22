@@ -15,7 +15,6 @@ import net.orbit.orbit.services.StudentService;
 import net.orbit.orbit.utils.OrbitUserPreferences;
 
 public class FindStudentActivity extends BaseActivity {
-    private StudentService studentService = new StudentService(this);
 
     public static Intent createIntent(Context context) {
         Intent i = new Intent(context, FindStudentActivity.class);
@@ -49,9 +48,8 @@ public class FindStudentActivity extends BaseActivity {
                         studentSSN.getText().toString()
                 );
 
-                OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-                String uid = orbitPref.getStringPreference("userUID");
-                studentService.findStudent(studentDto, uid);
+                String uid = OrbitUserPreferences.getInstance().getStringPreference("userUID");
+                StudentService.getInstance().findStudent(studentDto, uid);
 
             }
         });

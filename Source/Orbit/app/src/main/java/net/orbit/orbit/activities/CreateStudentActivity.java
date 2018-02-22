@@ -31,7 +31,6 @@ import java.util.Date;
 
 public class CreateStudentActivity extends BaseActivity
 {
-    private StudentService studentService = new StudentService(this);
     private int mYear,mMonth,mDay;
 
     public static Intent createIntent(Context context) {
@@ -134,7 +133,7 @@ public class CreateStudentActivity extends BaseActivity
                                 0
                                 );
 
-                studentService.addStudent(newStudent);
+                StudentService.getInstance().addStudent(newStudent);
 
             }
         });

@@ -54,8 +54,6 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     Spinner roleSpinner;
-    UserService userService = new UserService(this);
-    RoleService roleService = new RoleService(this);
     Map<String, Role> mapRoles = new HashMap<>();
     private int mYear,mMonth,mDay;
 
@@ -69,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        roleService.viewRoles(this);
+        RoleService.getInstance().viewRoles(this);
         mapRoles.clear();
         roleSpinner = (Spinner) findViewById(R.id.roleSpinner);
 
@@ -218,8 +216,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                             Log.i("role", role.toString());
                             // Add user to database
-                            userService.addUser(accountDetails);
-                            userService.storeUserInPreferences(mAuth);
+                            UserService.getInstance().addUser(accountDetails);
+                            UserService.getInstance().storeUserInPreferences(mAuth);
                             Toast.makeText(RegisterActivity.this, R.string.newAccountCreated,
                                     Toast.LENGTH_SHORT).show();
 

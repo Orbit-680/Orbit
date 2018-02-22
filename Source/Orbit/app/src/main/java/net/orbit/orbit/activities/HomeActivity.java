@@ -40,13 +40,7 @@ import cz.msebera.android.httpclient.Header;
 
 
 public class HomeActivity extends BaseActivity {
-
-
-
-    PropertiesService propertiesService = new PropertiesService();
-    OrbitRestClient orbitRestClient = new OrbitRestClient();
     List<MainMenuItem> mainMenuItems = new ArrayList<>();
-    LogoutService logoutService = new LogoutService(this);
 
 
     @Override
@@ -139,7 +133,7 @@ public class HomeActivity extends BaseActivity {
 
                 if(temp.getLabel() == (R.string.menu_logout))
                 {
-                    logoutService.logout();
+                    LogoutService.getInstance().logout();
                 }
                 if(temp.getLabel() == (R.string.menu_add_student))
                 {
@@ -191,8 +185,8 @@ public class HomeActivity extends BaseActivity {
         });
 
         // Sets the URL for the API url
-        String apiUrl = propertiesService.getProperty(this, Constants.ORBIT_API_URL);
-        orbitRestClient.setBaseUrl(apiUrl);
+        String apiUrl = PropertiesService.getInstance().getProperty(this, Constants.ORBIT_API_URL);
+        OrbitRestClient.getInstance().setBaseUrl(apiUrl);
 
         // Displays a alert window and lets you know if your DB connection is successful.
         // If menu_student data is returned, then the connection was successful.
@@ -207,7 +201,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     public void getDBConnectionAlert() {
-        orbitRestClient.get("all-students", null, new JsonHttpResponseHandler() {
+        OrbitRestClient.getInstance().get("all-students", null, new JsonHttpResponseHandler() {
             @Override
             public void onStart() {
                 // called before request is started
@@ -227,7 +221,7 @@ public class HomeActivity extends BaseActivity {
                     Log.e("HomeActivity", "Error connection to DB: " + errorResponse.toString());
                     AlertDialog alertDialog = new AlertDialog.Builder(HomeActivity.this).create();
                     alertDialog.setTitle("DB Connection");
-                    alertDialog.setMessage("Cannot connect to DB: " + orbitRestClient.getBaseUrl());
+                    alertDialog.setMessage("Cannot connect to DB: " + OrbitRestClient.getInstance().getBaseUrl());
                     alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "OK",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {

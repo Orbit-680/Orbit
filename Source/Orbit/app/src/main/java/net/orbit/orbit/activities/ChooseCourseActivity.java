@@ -33,9 +33,6 @@ import java.util.List;
 
 public class ChooseCourseActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    CourseService courseService = new CourseService(this);
-    TeacherService teacherService = new TeacherService(this);
-    SecurityService securityService = new SecurityService();
 
     public static Intent createIntent(Context context) {
         Intent i = new Intent(context, ChooseCourseActivity.class);
@@ -61,14 +58,14 @@ public class ChooseCourseActivity extends BaseActivity {
         });
 
         if(ChooseCourseActivity.Adapter.courses.size() == 0){
-            courseService.getAllCourses(this);
+            CourseService.getInstance().getAllCourses(this);
 
         }
 
 
-        String UID = securityService.getCurrentUsersUid();
+        String UID = SecurityService.getInstance().getCurrentUsersUid();
         final OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        teacherService.getTeacherByUid(UID, new ServerCallback<Teacher>() {
+        TeacherService.getInstance().getTeacherByUid(UID, new ServerCallback<Teacher>() {
 
             @Override
             public void onSuccess(Teacher result) {
@@ -91,7 +88,7 @@ public class ChooseCourseActivity extends BaseActivity {
             }
         }
 
-        courseService.assignCourseToTeacher(assignList);
+        CourseService.getInstance().assignCourseToTeacher(assignList);
     }
 
     public void updateCourseList(List<Course> courseList)

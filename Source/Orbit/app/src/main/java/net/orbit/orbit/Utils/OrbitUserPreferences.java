@@ -10,6 +10,7 @@ import net.orbit.orbit.models.pojo.Course;
 import net.orbit.orbit.models.pojo.Student;
 import net.orbit.orbit.models.pojo.Teacher;
 import net.orbit.orbit.models.pojo.User;
+import net.orbit.orbit.services.CourseService;
 
 import java.util.List;
 
@@ -18,17 +19,28 @@ import java.util.List;
  */
 
 public class OrbitUserPreferences {
-    private Context context;
-    final private String prefName = "Orbit";
-    private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
+    // Creates a singleton
+    private OrbitUserPreferences() { }
 
-    public OrbitUserPreferences(Context context)
-    {
+    private static OrbitUserPreferences _orbitUserPreferences;
+
+    public static OrbitUserPreferences getInstance(){
+        if (_orbitUserPreferences == null){
+            _orbitUserPreferences = new OrbitUserPreferences();
+        }
+        return _orbitUserPreferences;
+    }
+    private Context context;
+
+    public OrbitUserPreferences(Context context){
         this.context = context;
         pref = this.context.getSharedPreferences(prefName, 0);
         editor = pref.edit();
     }
+    final private String prefName = "Orbit";
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
+
 
     /**
      * Storing object in shared preferences

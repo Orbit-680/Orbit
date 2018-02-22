@@ -27,14 +27,23 @@ import cz.msebera.android.httpclient.entity.StringEntity;
  */
 
 public class UserService {
-    OrbitRestClient orbitRestClient = new OrbitRestClient();
-    PropertiesService propertiesService = new PropertiesService();
-    Context context;
+    // Creates a singleton
+    private UserService() { }
+
+    private static UserService _userService;
+
+    public static UserService getInstance(){
+        if (_userService == null){
+            _userService = new UserService();
+        }
+        return _userService;
+    }
+
+    private Context context;
 
     public UserService(Context context){
         this.context = context;
     }
-
 
     public void addUser(AccountDetailsDTO accountDetails){
         Gson gson = new Gson();
@@ -46,8 +55,8 @@ public class UserService {
             e.printStackTrace();
         }
 
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context, Constants.ORBIT_API_URL));
-        orbitRestClient.post(this.context, "add-user", entity, "application/json",
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "add-user", entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {
@@ -84,8 +93,8 @@ public class UserService {
 
         }
         String url = "get-user/" + uid;
-        orbitRestClient.setBaseUrl(propertiesService.getProperty(this.context,Constants.ORBIT_API_URL));
-        orbitRestClient.get(url, null, new JsonHttpResponseHandler(){
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().get(url, null, new JsonHttpResponseHandler(){
                     @Override
                     public void onStart() {
                         // called before request is started
