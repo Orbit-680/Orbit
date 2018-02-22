@@ -38,7 +38,7 @@ public class CourseService {
     // Creates a singleton
     private CourseService() { }
 
-    private static CourseService   _courseService;
+    private static CourseService _courseService;
 
     public static CourseService getInstance(){
         if (_courseService == null){
@@ -54,7 +54,8 @@ public class CourseService {
 
     public void getAllCoursesAssignedToCurrentTeacher(final ViewCoursesTeacherActivity activity){
         Log.d("CourseService", "Getting all the courses assigned to current Teacher.");
-        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(activity, Constants.ORBIT_API_URL));
+        String url = OrbitRestClient.getInstance().getBaseUrl();
 
         String UID = SecurityService.getInstance().getCurrentUsersUid();
         TeacherService.getInstance().getTeacherByUid(UID, new ServerCallback<Teacher>() {
@@ -90,7 +91,7 @@ public class CourseService {
 
     public void getAllCourses(final ChooseCourseActivity activity){
         Log.d("CourseService", "Getting all the courses.");
-        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(activity, Constants.ORBIT_API_URL));
 
         OrbitRestClient.getInstance().get("all-courses/", null, new JsonHttpResponseHandler(){
 
@@ -110,9 +111,8 @@ public class CourseService {
         });
     }
 
-    public void assignCourseToTeacher(List<Course> courseList){
-        OrbitUserPreferences orbitPref = new OrbitUserPreferences(context);
-        Teacher teacher = orbitPref.getTeacherPreferenceObj("loggedInTeacher");
+    public void assignCourseToTeacher(final ViewCoursesTeacherActivity activity, List<Course> courseList){
+        Teacher teacher = OrbitUserPreferences.getInstance().getTeacherPreferenceObj("loggedInTeacher");
         AssignCourseToTeacherDTO assignDTO = new AssignCourseToTeacherDTO();
         for(Course c : courseList){
             assignDTO.addCourseRecord(c);
@@ -127,7 +127,53 @@ public class CourseService {
             e.printStackTrace();
         }
         // Sets the URL for the API url
-        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(activity,Constants.ORBIT_API_URL));
+        OrbitRestClient.getInstance().post(this.context, "assign-course-to-teacher/" + teacher.getTeacherID(), entity, "application/json",
+                new JsonHttpResponseHandler(){
+                    @Override
+                    public void onStart() {
+                        // called before request is started
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        // called when success happens
+                        Log.i("CourseService", "Successfully assigned courses to teacher.");
+                        // We have a match student. Need to do linking here.
+                        Toast.makeText(context, "Assign courses successfully" , Toast.LENGTH_SHORT).show();
+                        context.startActivity(ViewCoursesTeacherActivity.createIntent(context));
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+                        // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                        Log.e("CourseService", "Error when assigning courses to teacher: " + errorResponse);
+                        Toast.makeText(context, "Error assigning courses to teacher, please try again.  If the problem persists contact your administrator.", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onRetry(int retryNo) {
+                        // called when request is retried
+                    }
+                });
+    }
+    public void assignCourseToTeacher(final ChooseCourseActivity activity, List<Course> courseList){
+        Teacher teacher = OrbitUserPreferences.getInstance().getTeacherPreferenceObj("loggedInTeacher");
+        AssignCourseToTeacherDTO assignDTO = new AssignCourseToTeacherDTO();
+        for(Course c : courseList){
+            assignDTO.addCourseRecord(c);
+        }
+
+        Gson gson = new Gson();
+        String json = gson.toJson(assignDTO);
+        StringEntity entity = null;
+        try {
+            entity = new StringEntity(json.toString());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        // Sets the URL for the API url
+        OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(activity,Constants.ORBIT_API_URL));
         OrbitRestClient.getInstance().post(this.context, "assign-course-to-teacher/" + teacher.getTeacherID(), entity, "application/json",
                 new JsonHttpResponseHandler(){
                     @Override

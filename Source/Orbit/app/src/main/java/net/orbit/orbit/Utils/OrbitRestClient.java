@@ -15,8 +15,8 @@ import cz.msebera.android.httpclient.HttpEntity;
 
 public class OrbitRestClient {
     // TODO Make this value a properties value
-    //private static final String BASE_URL = "http://18.220.78.140/orbit-api/";
-    //private static final String BASE_URL = "http://10.0.2.2:8080/";
+    private static final String BASE_URL_INT = "http://orbit-integration.brocktubre.com/orbit-api/";
+    private static final String BASE_URL_LOCAL = "http://10.0.2.2:8080/";
     private static OrbitRestClient   _orbitRestClient;
     private OrbitRestClient(){
 
@@ -59,6 +59,9 @@ public class OrbitRestClient {
 
     public void setBaseUrl(String url){
         this.baseUrl = url;
+        if(this.baseUrl == null){
+            this.baseUrl = BASE_URL_LOCAL;
+        }
     }
 
     public String getBaseUrl(){

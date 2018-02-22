@@ -115,6 +115,7 @@ public class TeacherService {
 
     public void getTeacherByUid(String UID, final ServerCallback<Teacher> callback){
         OrbitRestClient.getInstance().setBaseUrl(PropertiesService.getInstance().getProperty(this.context, Constants.ORBIT_API_URL));
+        String url = OrbitRestClient.getInstance().getBaseUrl();
         OrbitRestClient.getInstance().get("get-teacher-by-uid/" + UID, null, new JsonHttpResponseHandler(){
 
             @Override
