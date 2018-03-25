@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -41,7 +42,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import net.orbit.orbit.R;
+import net.orbit.orbit.models.exceptions.ErrorResponse;
 import net.orbit.orbit.services.UserService;
+import net.orbit.orbit.utils.ServerCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,9 +78,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
-    private UserService userService = new UserService(this);
-
+    private RelativeLayout mEmailSignInButton;
+    private TextView mRegisterButton;
+    private Context test = this;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -96,19 +99,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
-        // This code bellow is giving some trouble (have to do some more research on it)
-//        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-//                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-//                    attemptLogin();
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
 
-        RelativeLayout mEmailSignInButton = (RelativeLayout) findViewById(R.id.email_sign_in_button);
+        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == EditorInfo.IME_ACTION_DONE) {
+                    attemptLogin();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        mEmailSignInButton = (RelativeLayout) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,7 +119,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        TextView mRegisterButton = (TextView) findViewById(R.id.register_button);
+        mRegisterButton = (TextView) findViewById(R.id.register_button);
         mRegisterButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -140,6 +143,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if(currentUser != null) {
             Toast.makeText(this, "Welcome Back " + currentUser.getEmail(),
                     Toast.LENGTH_SHORT).show();
+            mEmailSignInButton.setClickable(false);
+            mRegisterButton.setClickable(false);
             loadHomeScreen();
         }
 
@@ -161,8 +166,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void loadHomeScreen()
     {
-        userService.storeUserInPreferences(mAuth);
-        startActivity(HomeActivity.createIntent(this));
+        UserService userService = new UserService(test);
+        showProgress(true);
+        userService.storeUserInPreferences(mAuth, new ServerCallback<Boolean>(){
+
+            @Override
+            public void onSuccess(Boolean result) {
+                showProgress(false);
+                startActivity(HomeActivity.createIntent(test));
+            }
+
+            @Override
+            public void onFail(ErrorResponse errorMessage) {
+                showProgress(false);
+            }
+        });
     }
 
     private void loginAccount(String email, String password) {
@@ -178,7 +196,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(LoginActivity.this, "Login Successful!",
                                     Toast.LENGTH_SHORT).show();
-                            userService.storeUserInPreferences(mAuth);
                             loadHomeScreen();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -302,12 +319,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private boolean isEmailValid(String email) {
+    public boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
-    private boolean isPasswordValid(String password) {
+    public boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return password.length() > 5;
     }

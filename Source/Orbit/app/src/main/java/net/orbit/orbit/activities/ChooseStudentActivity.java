@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -13,15 +14,17 @@ import android.widget.TextView;
 
 import net.orbit.orbit.R;
 import net.orbit.orbit.models.pojo.Student;
+import net.orbit.orbit.models.pojo.User;
+import net.orbit.orbit.services.PopupService;
 import net.orbit.orbit.services.StudentService;
 import net.orbit.orbit.utils.OrbitUserPreferences;
+import net.orbit.orbit.utils.PopupMessages;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseStudentActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    StudentService studentService = new StudentService(this);
 
     public static Intent createIntent(Context context) {
         Intent i = new Intent(context, ChooseStudentActivity.class);
@@ -32,29 +35,36 @@ public class ChooseStudentActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_choose_student);
-
+        context = this;
         //need to inflate this activity inside the relativeLayout inherited from BaseActivity.  This will add this view to the mainContent layout
         getLayoutInflater().inflate(R.layout.activity_choose_student, relativeLayout);
 
         //get UID of current user
-        OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        String uid = orbitPref.getUserPreference("userUID");
+
+        StudentService studentService = new StudentService(this);
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new Adapter(this));
 
-        studentService.findLinkedStudents(this, uid);
+        studentService.findLinkedStudents(this);
 
     }
 
     public void updateStudentList(List<Student> studentList)
     {
-        for(int i = 0; i < studentList.size(); i++)
-        {
-            Adapter.students.add((Student)studentList.get(i));
+        if (studentList.size() < 1) {
+            TextView noStudents = (TextView)findViewById(R.id.noStudents);
+            noStudents.setVisibility(View.VISIBLE);
+            return;
         }
 
+        recyclerView.setVisibility(View.VISIBLE);
+
+        Adapter.students.clear();
+        for(Student s : studentList){
+            Adapter.students.add(s);
+        }
         reloadList();
     }
 
@@ -107,7 +117,7 @@ public class ChooseStudentActivity extends BaseActivity {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        public final ImageView memeImage;
+        public final ImageView iconImage;
         public final TextView txtStudentName;
 
         public ViewHolder(View itemView) {
@@ -115,23 +125,23 @@ public class ChooseStudentActivity extends BaseActivity {
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
 
-            memeImage = (ImageView) itemView.findViewById(R.drawable.ic_person_black_24px);
+            iconImage = (ImageView) itemView.findViewById(R.id.iconImage);
+            iconImage.setImageResource(R.drawable.ic_perm_identity_white_24px);
             txtStudentName = (TextView) itemView.findViewById(R.id.txtStudentName);
         }
 
         @Override
         public void onClick(View v) {
-
-            /*TextView top = (TextView) itemView.findViewById(R.id.txtTop);
-            TextView bottom = (TextView) itemView.findViewById(R.id.txtBottom);
-            TextView url = (TextView) itemView.findViewById(R.id.txtURLString);
-
-            String text = (String) top.getText();
+            int position = getAdapterPosition();
+            Student student = ChooseStudentActivity.Adapter.students.get(position);
+            int studentID = student.getStudentId();
+            String studentFullName = student.getStudentFirstName() + " " + student.getStudentLastName();
 
             Context context = itemView.getContext();
-            context.startActivity(MemeCloseUpActivity.createIntent(
-                    context, (String) top.getText(), (String) bottom.getText(), (String) url.getText()));*/
-
+            Intent intent = CourseGradesActivity.createIntent(context);
+            intent.putExtra("chosenStudentID", studentID);
+            intent.putExtra("studentFullName", studentFullName);
+            context.startActivity(intent);
         }
 
         @Override
@@ -152,5 +162,18 @@ public class ChooseStudentActivity extends BaseActivity {
 
     }
 
+    private Context context;
 
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId())
+        {
+            case R.id.menu_info:
+                PopupService p = new PopupService(context);
+                p.showPopup(PopupMessages.CHOOSE_STUDENT_MESSAGE);
+        }
+
+
+        // Handle your other action bar items...
+        return super.onOptionsItemSelected(item);
+    }
 }

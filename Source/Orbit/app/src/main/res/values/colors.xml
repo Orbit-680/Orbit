@@ -2,6 +2,46 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <!--<color name="colorAccent">#FF4081</color> PINK -->
+    <color name="colorAccent">#FFFF</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="placeholderColor">#70DBDB</color>
+
+    <!---
+
+
+
+
+
+
+
+    -->
+
+
+    <!-- Login -->
+
+    <!-- Open Chat -->
+
+    <!-- Group Chat -->
+    <color name="groupChatTextMe">#ffffff</color>
+    <color name="groupChatBubbleOther">#eef1f6</color>
+    <color name="groupChatTextOther">#000000</color>
+
+    <color name="groupChatReadReceiptMe">#1fcc94</color>
+    <color name="groupChatReadReceiptOther">#00BCD4</color>
+
+    <color name="groupChatAdminBackground">#e0fcff</color>
+
+    <color name="groupChatDateText">#ffffff</color>
+    <color name="groupChatDateBackground">#C0C0C0</color>
+
+    <!-- Group Channel List -->
+    <color name="groupChannelUnreadCountBackground">#7d62df</color>
+    <color name="groupChannelUnreadCountText">#ffffff</color>
+
+    <!-- Selector -->
+    <color name="btn_edit">#ffffff</color>
+    <color name="btn_edit_disabled">#c1acff</color>
+
+
 </resources>

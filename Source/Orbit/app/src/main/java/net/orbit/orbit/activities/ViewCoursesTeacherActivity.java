@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -20,13 +21,14 @@ import net.orbit.orbit.models.pojo.Course;
 
 import net.orbit.orbit.R;
 import net.orbit.orbit.services.CourseService;
+import net.orbit.orbit.services.PopupService;
+import net.orbit.orbit.utils.PopupMessages;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ViewCoursesTeacherActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    CourseService courseService = new CourseService(this);
 
     public static Intent createIntent(Context context) {
         Intent i = new Intent(context, ViewCoursesTeacherActivity.class);
@@ -37,7 +39,7 @@ public class ViewCoursesTeacherActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        context = this;
         //need to inflate this activity inside the relativeLayout inherited from BaseActivity.  This will add this view to the mainContent layout
         getLayoutInflater().inflate(R.layout.activity_view_courses_teacher, relativeLayout);
 
@@ -48,9 +50,9 @@ public class ViewCoursesTeacherActivity extends BaseActivity {
         FloatingActionButton mFabAddCourse = (FloatingActionButton) findViewById(R.id.fab_add_course);
         mFabAddCourse.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("ViewCoursesTActivity", "We want to add a new Course.");
-                Intent chooseCourseActivity = new Intent(ViewCoursesTeacherActivity.this, ChooseCourseActivity.class);
-                ViewCoursesTeacherActivity.this.startActivity(chooseCourseActivity);
+                Log.d("ViewCoursesActivity", "We want to add a new Course.");
+                Intent createCourseActivity = new Intent(ViewCoursesTeacherActivity.this, CreateCourseActivity.class);
+                ViewCoursesTeacherActivity.this.startActivity(createCourseActivity);
             }
 
         });
@@ -60,10 +62,12 @@ public class ViewCoursesTeacherActivity extends BaseActivity {
         recyclerView.setAdapter(new Adapter(this));
 
         Adapter.courses = new ArrayList<>();
+        CourseService courseService = new CourseService(this);
         courseService.getAllCoursesAssignedToCurrentTeacher(this);
+    }
 
-
-
+    public void test()
+    {
 
     }
 
@@ -83,6 +87,11 @@ public class ViewCoursesTeacherActivity extends BaseActivity {
             Adapter.courses.add(c);
         }
         reloadList();
+    }
+
+    public static void loadAssignments(int courseID)
+    {
+
     }
 
     public void reloadList()
@@ -138,7 +147,8 @@ public class ViewCoursesTeacherActivity extends BaseActivity {
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
 
-            iconImage = (ImageView) itemView.findViewById(R.drawable.ic_class_black_24px);
+            iconImage = (ImageView) itemView.findViewById(R.id.iconImage);
+            iconImage.setImageResource(R.drawable.ic_class_white_24px);
             txtCourseName = (TextView) itemView.findViewById(R.id.txtCourseName);
         }
 
@@ -148,11 +158,8 @@ public class ViewCoursesTeacherActivity extends BaseActivity {
             int position = getAdapterPosition();
             Course course = ViewCoursesTeacherActivity.Adapter.courses.get(position);
             Context context = itemView.getContext();
-            Intent intent = new Intent(context, ViewCourseActivity.class);
-            intent.putExtra("courseName", course.getName());
-            intent.putExtra("courseId", course.getCourseId());
+            Intent intent = ViewCourseAssignmentsActivity.createIntent(context, course.getCourseId());
             context.startActivity(intent);
-
         }
 
         @Override
@@ -173,6 +180,19 @@ public class ViewCoursesTeacherActivity extends BaseActivity {
 
     }
 
+    private Context context;
 
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId())
+        {
+            case R.id.menu_info:
+                PopupService p = new PopupService(context);
+                p.showPopup(PopupMessages.VIEW_COURSES_TEACHER);
+        }
+
+
+        // Handle your other action bar items...
+        return super.onOptionsItemSelected(item);
+    }
 
 }
