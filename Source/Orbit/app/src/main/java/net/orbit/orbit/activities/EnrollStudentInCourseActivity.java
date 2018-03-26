@@ -4,21 +4,26 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import net.orbit.orbit.R;
 import net.orbit.orbit.models.pojo.Student;
+import net.orbit.orbit.services.PopupService;
 import net.orbit.orbit.services.StudentService;
 import net.orbit.orbit.utils.OrbitUserPreferences;
+import net.orbit.orbit.utils.PopupMessages;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -26,24 +31,24 @@ import java.util.List;
 
 public class EnrollStudentInCourseActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    StudentService studentService = new StudentService(this);
+    private static int courseID = 0;
 
-    public static Intent createIntent(Context context) {
+    public static Intent createIntent(Context context, int courseID) {
         Intent i = new Intent(context, EnrollStudentInCourseActivity.class);
+        EnrollStudentInCourseActivity.courseID = courseID;
         return i;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        context = this;
         //need to inflate this activity inside the relativeLayout inherited from BaseActivity.  This will add this view to the mainContent layout
         getLayoutInflater().inflate(R.layout.activity_enroll_student_in_course, relativeLayout);
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new EnrollStudentInCourseActivity.Adapter(this));
-
         findViewById(R.id.btnEnroll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,37 +59,48 @@ public class EnrollStudentInCourseActivity extends BaseActivity {
         //loadList();
 
         //if(EnrollStudentInCourseActivity.Adapter.students == null || EnrollStudentInCourseActivity.Adapter.students.size() < 0)
+
+        StudentService studentService = new StudentService(this);
         studentService.findAllStudents(this);
     }
-
-    /*protected void onResume() {
-        super.onResume();
-        reloadList();
-    }*/
 
     private void enrollStudents()
     {
         List<Student> enrollList = new ArrayList<>();
-        for(int i = 0; i < EnrollStudentInCourseActivity.Adapter.students.size(); i++)
+        for(Student s : EnrollStudentInCourseActivity.Adapter.students)
         {
-            if(EnrollStudentInCourseActivity.Adapter.students.get(i).getIsSelected())
-                enrollList.add(EnrollStudentInCourseActivity.Adapter.students.get(i));
+            if(s.getIsSelected())
+                enrollList.add(s);
         }
-
-        studentService.enrollStudentsInCourse(enrollList, 1);
+        if (enrollList.size() < 1) {
+            Toast.makeText(this, "Please select at least one student!" , Toast.LENGTH_SHORT).show();
+            return;
+        }
+        StudentService studentService = new StudentService(this);
+        studentService.enrollStudentsInCourse(enrollList, EnrollStudentInCourseActivity.courseID);
     }
 
     public void saveStudentList()
     {
-        OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        orbitPref.storeUserPreference("studentList", EnrollStudentInCourseActivity.Adapter.students);
+
+        OrbitUserPreferences orbitPref = new OrbitUserPreferences(this);
+        orbitPref.storeListPreference("studentList", EnrollStudentInCourseActivity.Adapter.students);
     }
 
     public void updateStudentList(List<Student> studentList)
     {
-        for(int i = 0; i < studentList.size(); i++)
+
+        if (studentList.size() < 1) {
+            TextView noStudents = (TextView)findViewById(R.id.noStudents);
+            noStudents.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        recyclerView.setVisibility(View.VISIBLE);
+
+        for(Student s : studentList)
         {
-            EnrollStudentInCourseActivity.Adapter.students.add((Student)studentList.get(i));
+            EnrollStudentInCourseActivity.Adapter.students.add(s);
         }
 
         reloadList();
@@ -101,8 +117,8 @@ public class EnrollStudentInCourseActivity extends BaseActivity {
         Gson gson = new Gson();
         Type type = new TypeToken<List<Student>>() {}.getType();
         List<Student> savedStudentList = new ArrayList<>();
-        OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
-        savedStudentList = gson.fromJson(orbitPref.getUserPreference("studentList"), type);
+        OrbitUserPreferences orbitPref = new OrbitUserPreferences(this);
+        savedStudentList = gson.fromJson(orbitPref.getStringPreference("studentList"), type);
 
         //only set the meme list if a List was found saved in Shared Preferences
         if(savedStudentList != null && savedStudentList.size() > 0) {
@@ -160,18 +176,21 @@ public class EnrollStudentInCourseActivity extends BaseActivity {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        public final ImageView memeImage;
+        public final ImageView iconImage;
         public final TextView txtStudentName;
         public boolean isSelected;
+        public Drawable itemBackground;
 
         public ViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
 
-            memeImage = (ImageView) itemView.findViewById(R.drawable.ic_person_black_24px);
+            iconImage = (ImageView) itemView.findViewById(R.id.iconImage);
+            iconImage.setImageResource(R.drawable.ic_perm_identity_white_24px);
             txtStudentName = (TextView) itemView.findViewById(R.id.txtStudentName);
             isSelected = false;
+            itemBackground = txtStudentName.getBackground();
         }
 
         @Override
@@ -179,11 +198,11 @@ public class EnrollStudentInCourseActivity extends BaseActivity {
             int position = getAdapterPosition();
             if(EnrollStudentInCourseActivity.Adapter.students.get(position).getIsSelected()) {
                 EnrollStudentInCourseActivity.Adapter.students.get(position).setIsSelected(false);
-                itemView.setBackgroundColor(Color.WHITE);
+                txtStudentName.setBackground(itemBackground);
             }
             else {
                 EnrollStudentInCourseActivity.Adapter.students.get(position).setIsSelected(true);
-                itemView.setBackgroundColor(Color.parseColor("#90CAF9"));
+                txtStudentName.setBackgroundColor(Color.parseColor("#90CAF9"));
             }
         }
 
@@ -205,4 +224,18 @@ public class EnrollStudentInCourseActivity extends BaseActivity {
 
     }
 
+    private Context context;
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId())
+        {
+            case R.id.menu_info:
+                PopupService p = new PopupService(context);
+                p.showPopup(PopupMessages.ENROLL_STUDENT_IN_COURSE_MESSAGE);
+        }
+
+
+        // Handle your other action bar items...
+        return super.onOptionsItemSelected(item);
+    }
 }

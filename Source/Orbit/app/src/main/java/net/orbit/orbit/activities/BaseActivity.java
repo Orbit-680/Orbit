@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,20 +22,27 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import net.orbit.orbit.R;
-import net.orbit.orbit.models.pojo.Role;
+import net.orbit.orbit.messaging.main.MainActivity;
+import net.orbit.orbit.models.pojo.MainMenuItem;
+import net.orbit.orbit.models.pojo.MenuList;
 import net.orbit.orbit.models.pojo.User;
+import net.orbit.orbit.services.ConnectToSendBird;
 import net.orbit.orbit.services.LogoutService;
 import net.orbit.orbit.utils.Constants;
 import net.orbit.orbit.utils.OrbitUserPreferences;
 
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * BaseActivity - class that app other app activities will extend.  This will provide the nav menu by default.  When
  *      extending this class you need to open AndroidManifest.xml and make sure your activity is using the NoActionBar theme.
  */
 public class BaseActivity extends AppCompatActivity {
+
     private static String TAG = BaseActivity.class.getSimpleName();
     ListView mDrawerList;
     RelativeLayout mDrawerPane;
@@ -45,12 +53,18 @@ public class BaseActivity extends AppCompatActivity {
     private OrbitMenuNavigation orbitNav;
     private TextView userName;
     private boolean navBarUpdated = false;
+    private Context test;
+
+    int selectedItem = 0;
 
     //user setters to set menu title when menu drawer is open and closed
     private String drawerOpenTitle = "";
     private String drawerClosedTitle = "";
+    private String activityTitle = "";
 
-    private LogoutService logoutService;
+    private List<MainMenuItem> mainMenuItems;
+    private DrawerListAdapter adapter;
+
 
     public String getDrawerOpenTitle() {
         return drawerOpenTitle;
@@ -66,6 +80,12 @@ public class BaseActivity extends AppCompatActivity {
 
     public void setDrawerClosedTitle(String drawerClosedTitle) {
         this.drawerClosedTitle = drawerClosedTitle;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_info, menu);
+        return true;
     }
 
     /**
@@ -150,6 +170,12 @@ public class BaseActivity extends AppCompatActivity {
         public static final int LOG_OFF = 6;
         public static final int VIEW_COURSES = 7;
         public static final int ENROLL_STUDENT_IN_COURSE = 8;
+        public static final int CHOOSE_COURSE = 9;
+        public static final int VIEW_ASSIGNMENTS = 10;
+        public static final int CREATE_ASSIGNMENT = 11;
+        public static final int REPORT_A_BUG = 12;
+        public static final int COURSE_GRADES = 13;
+        public static final int MESSAGING = 14;
 
 
 
@@ -169,10 +195,10 @@ public class BaseActivity extends AppCompatActivity {
         public void gotoMenuItem(int position)
         {
             NavItem item = (NavItem)mNavItems.get(position);
-            logoutService = new LogoutService(context);
+            LogoutService logoutService = new LogoutService(this.context);
 
             // translation of menu item titles -> defined menu constants
-            int selectedItem = 0;
+            selectedItem = 0;
             if(item.mTitle.trim().equals("Home"))
                 selectedItem = HOME;
             else if(item.mTitle.trim().equals("Add Student"))
@@ -191,6 +217,20 @@ public class BaseActivity extends AppCompatActivity {
                 selectedItem = LOG_OFF;
             else if(item.mTitle.trim().equals("View Courses"))
                 selectedItem = VIEW_COURSES;
+            else if(item.mTitle.trim().equals("Choose Course"))
+                selectedItem = CHOOSE_COURSE;
+            else if(item.mTitle.trim().equals("View Assignments"))
+                selectedItem = VIEW_ASSIGNMENTS;
+            else if(item.mTitle.trim().equals("Create Assignment"))
+                selectedItem = CREATE_ASSIGNMENT;
+            else if(item.mTitle.trim().equals("Report A Bug"))
+                selectedItem = REPORT_A_BUG;
+            else if(item.mTitle.trim().equals("My Grades"))
+                selectedItem = COURSE_GRADES;
+            else if (item.mTitle.trim().equals("Message Center"))
+                selectedItem = MESSAGING;
+
+
 
 
             switch(selectedItem)
@@ -208,11 +248,33 @@ public class BaseActivity extends AppCompatActivity {
                 case CHOOSE_STUDENT: startActivityForResult(ChooseStudentActivity.createIntent(context), result);
                     break;
                 case LOG_OFF:
+                    finish();
                     logoutService.logout();
                     break;
                 case VIEW_COURSES: startActivityForResult(ViewCoursesTeacherActivity.createIntent(context), result);
                     break;
                 case ENROLL_STUDENT_IN_COURSE: startActivityForResult(EnrollStudentInCourseActivity.createIntent(context), result);
+                    break;
+                case CHOOSE_COURSE: startActivityForResult(ChooseCourseActivity.createIntent(context), result);
+                    break;
+                case VIEW_ASSIGNMENTS: startActivityForResult(ViewCourseAssignmentsActivity.createIntent(context), result);
+                    break;
+                case CREATE_ASSIGNMENT: startActivityForResult(CreateAssignmentActivity.createIntent(context), result);
+                    break;
+                case REPORT_A_BUG: startActivityForResult(ReportABugActivity.createIntent(context), result);
+                    break;
+                case COURSE_GRADES: startActivityForResult(CourseGradesActivity.createIntent(context), result);
+                    break;
+                case MESSAGING:
+                    ConnectToSendBird connectToSendBird = new ConnectToSendBird(this.context);
+                    OrbitUserPreferences orbitPref = new OrbitUserPreferences(this.context);
+                    final User user = orbitPref.getUserPreferenceObj("loggedUser");
+                    /*** Connects user to SendBird by Email **/
+                    String nickName = user.getFirstName() + user.getLastName()  +
+                            " (" + user.getRole().getName().toString() + ")";
+                    connectToSendBird.connectToSendBird(user.getUid(), nickName);
+                    Intent newIntent = new Intent(BaseActivity.this, MainActivity.class);
+                    startActivity(newIntent);
                     break;
             }
         }
@@ -226,6 +288,10 @@ public class BaseActivity extends AppCompatActivity {
             Toast.makeText(context, message,
                     Toast.LENGTH_SHORT).show();
         }
+
+    }
+
+    public void testMethod(){
 
     }
 
@@ -247,6 +313,20 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
+        test = this;
+        Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        /***
+         * SendBird
+         */
+        OrbitUserPreferences.init(getApplicationContext());
+
+        /***
+         * SendBird
+         */
 
         relativeLayout = (RelativeLayout)findViewById(R.id.mainContent);
 
@@ -260,7 +340,7 @@ public class BaseActivity extends AppCompatActivity {
         // Populate the Navigtion Drawer with options
         mDrawerPane = (RelativeLayout) findViewById(R.id.drawerPane);
         mDrawerList = (ListView) findViewById(R.id.navList);
-        DrawerListAdapter adapter = new DrawerListAdapter(this, mNavItems);
+        this.adapter = new DrawerListAdapter(this, mNavItems);
         mDrawerList.setAdapter(adapter);
 
         // Drawer Item click listeners
@@ -282,12 +362,12 @@ public class BaseActivity extends AppCompatActivity {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
-                getSupportActionBar().setTitle(getDrawerOpenTitle());
+                getSupportActionBar().setTitle(activityTitle);
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
-                getSupportActionBar().setTitle(getDrawerClosedTitle());
+                activityTitle = getSupportActionBar().getTitle().toString();
                 if (!navBarUpdated) {
                     updateNavBar();
                     navBarUpdated = true;
@@ -298,36 +378,60 @@ public class BaseActivity extends AppCompatActivity {
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     public void updateNavBar(){
-        OrbitUserPreferences orbitPref = new OrbitUserPreferences(getApplicationContext());
+        OrbitUserPreferences orbitPref = new OrbitUserPreferences(this);
         User user = orbitPref.getUserPreferenceObj("loggedUser");
         Log.i("UserFromSharedPref", user.toString());
-        Role userRole = user.getRole();
+        String userRole = user.getRole().getName();
 
-        if (userRole.getName().equals(Constants.ROLE_ADMIN)) {
-            mNavItems.add(new NavItem(getString(R.string.menu_add_student), getString(R.string.menu_add_student), R.drawable.menu_student));
-            mNavItems.add(new NavItem(getString(R.string.menu_link_student), getString(R.string.menu_link_student), R.drawable.menu_link_parent_student));
-            mNavItems.add(new NavItem(getString(R.string.menu_add_teacher), getString(R.string.menu_add_teacher), R.drawable.menu_teacher));
-            mNavItems.add(new NavItem(getString(R.string.menu_view_teacher), getString(R.string.menu_view_teacher), R.drawable.menu_view_teachers));
-            mNavItems.add(new NavItem(getString(R.string.menu_choose_student), getString(R.string.menu_choose_student), R.drawable.menu_choose_student));
-            mNavItems.add(new NavItem(getString(R.string.menu_enroll_student_in_course), getString(R.string.menu_enroll_student_in_course), R.drawable.menu_enroll_student_in_course));
-        } else if (userRole.getName().equals(Constants.ROLE_TEACHER)) {
-            mNavItems.add(new NavItem(getString(R.string.menu_add_student), getString(R.string.menu_add_student), R.drawable.menu_student));
-            mNavItems.add(new NavItem(getString(R.string.menu_link_student), getString(R.string.menu_link_student), R.drawable.menu_link_parent_student));
-            mNavItems.add(new NavItem(getString(R.string.menu_view_courses), getString(R.string.menu_view_courses), R.drawable.menu_choose_student));
-            mNavItems.add(new NavItem(getString(R.string.menu_enroll_student_in_course), getString(R.string.menu_enroll_student_in_course), R.drawable.menu_enroll_student_in_course));
+        if (userRole.equals(Constants.ROLE_ADMIN))
+        {
+            this.mainMenuItems = MenuList.adminMenuList;
+            for(MainMenuItem item : mainMenuItems)
+            {
+                String label = getString(item.getLabel());
+                String title = getString(item.getTitle());
+                mNavItems.add(new NavItem(label, title, item.getImage()));
+                adapter.notifyDataSetChanged();
+            }
+        } else if (userRole.equals(Constants.ROLE_TEACHER))
+        {
+            this.mainMenuItems = MenuList.teacherMenuList;
+            for(MainMenuItem item : mainMenuItems)
+            {
+                    String label = getString(item.getLabel());
+                    String title = getString(item.getTitle());
+                    mNavItems.add(new NavItem(label, title, item.getImage()));
+                    adapter.notifyDataSetChanged();
+            }
 
+        } else if (userRole.equals(Constants.ROLE_PARENT))
+        {
+            this.mainMenuItems = MenuList.parentMenuList;
+            for(MainMenuItem item : mainMenuItems)
+            {
+                    String label = getString(item.getLabel());
+                    String title = getString(item.getTitle());
+                    mNavItems.add(new NavItem(label, title, item.getImage()));
+                    adapter.notifyDataSetChanged();
+            }
+
+        } else if (userRole.equals(Constants.ROLE_STUDENT))
+        {
+            this.mainMenuItems = MenuList.studentMenuList;
+            for(MainMenuItem item : mainMenuItems)
+            {
+                    String label = getString(item.getLabel());
+                    String title = getString(item.getTitle());
+                    mNavItems.add(new NavItem(label, title, item.getImage()));
+                    adapter.notifyDataSetChanged();
+            }
         }
-        mNavItems.add(new NavItem(getString(R.string.menu_logout), getString(R.string.menu_logout), R.drawable.menu_logout));
         orbitNav = new OrbitMenuNavigation(getApplicationContext());
         userName = (TextView)findViewById(R.id.userName);
-        userName.setText(user.getEmail() + " (" + user.getRole().getName() + ")");
+        userName.setText(user.getFirstName() + " " + user.getLastName() + " (" + user.getRole().getName() + ")");
     }
 
     @Override
@@ -341,6 +445,7 @@ public class BaseActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
+        mDrawerLayout.closeDrawer(mDrawerPane);
     }
 
     /*
@@ -370,5 +475,4 @@ public class BaseActivity extends AppCompatActivity {
         Intent i = new Intent(context, BaseActivity.class);
         return i;
     }
-
 }
